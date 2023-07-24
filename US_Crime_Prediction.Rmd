@@ -1,0 +1,112 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Content
+
+Variable - Description
+M - percentage of males aged 14–24 in total state population
+So - indicator variable for a southern state
+Ed - mean years of schooling of the population aged 25 years or over
+Po1 - per capita expenditure on police protection in 1960
+Po2 - per capita expenditure on police protection in 1959
+LF - labour force participation rate of civilian urban males in the age group 14-24
+M.F - number of males per 100 females
+Pop - state population in 1960 in hundred thousand
+NW - percentage of nonwhites in the population
+U1 - unemployment rate of urban males 14–24
+U2 - unemployment rate of urban males 35–39
+wealth - median value of transferable assets or family income
+Ineq - income inequality: percentage of families earning below half the median income
+Prob - probability of imprisonment: ratio of number of commitments to nunumber of offenses
+Time - average time in months served by offenders in state prisons before their first release
+Crime - crime rate: number of offenses per 100,000 population in 1960
+
+
+#installing packages
+install.packages("rpart")
+install.packages("rpart.plot")
+
+# Load the required packages
+library(ggplot2)
+library(dplyr)
+library(rpart)
+library(rpart.plot)
+
+# Read the dataset
+crime_data <- read.csv("...PATH/crime_rate_dataset.csv")
+
+# Explore the dataset
+head(crime_data)
+
+#Summary of crime dataset
+summary(crime_data)
+
+
+# Perform linear regression analysis
+lm_model <- lm(Crime ~ Pop + Ed, data = crime_data)
+
+# View the summary of the linear regression model
+summary(lm_model)
+
+# Predict crime rate for new data
+new_data <- data.frame(Pop = 250000, Ed = 12)
+predicted_crime_rate <- predict(lm_model, newdata = new_data)
+print(predicted_crime_rate)
+
+# Plot the relationship between predictors and crime rate
+ggplot(crime_data, aes(x = Pop, y = Crime)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  xlab("Population") +
+  ylab("Crime Rate")
+
+
+# Perform linear regression analysis
+lm_model <- lm(Crime ~ Ineq, data = crime_data)
+
+# View the summary of the linear regression model
+summary(lm_model)
+
+# Predict crime rate for new data
+new_data <- data.frame(Ineq = 0.35)
+predicted_crime_rate <- predict(lm_model, newdata = new_data)
+print(predicted_crime_rate)
+
+# Plot the relationship between income inequality and crime rate
+ggplot(data, aes(x = Ineq, y = Crime)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  xlab("Income Inequality") +
+  ylab("Crime Rate")
+  
+  
+# Calculate the root mean squared error (RMSE)
+predicted_values <- predict(lm_model)
+actual_values <- crime_data$Crime
+rmse <- sqrt(mean((actual_values - predicted_values)^2))
+print(rmse)
+
+# View the summary of the linear regression model
+summary(lm_model)
+
+
+# Split the crime_data into training and testing sets
+set.seed(123)
+train_indices <- sample(1:nrow(crime_data), 0.7 * nrow(crime_data))
+train_data <- crime_data[train_indices, ]
+test_data <- crime_data[-train_indices, ]
+
+# Train a decision tree model
+tree_model <- rpart(Crime ~., data = train_data)
+
+# Visualize the decision tree
+rpart.plot(tree_model)
+
+# Make predictions on the testing set
+predicted_values <- predict(tree_model, newdata = test_data)
+
+# Evaluate the model's performance
+accuracy <- sum(predicted_values == test_data$Crime) / length(test_data$Crime)
+print(accuracy)
